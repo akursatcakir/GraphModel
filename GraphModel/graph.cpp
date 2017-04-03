@@ -9,6 +9,12 @@ using namespace System::Windows::Forms;
 using namespace System::Drawing;
 using namespace System::Threading;
 
+ref class TraversalThreadData {
+public:
+	Graph^ graph;
+	Graph::TraversalAlgorithm alg;
+};
+
 Graph::Vertice^ Graph::getVertice(int data) {
 	for each (Vertice^ vertice in vertices)
 	{
@@ -145,20 +151,6 @@ void Graph::Paint(Graphics^ graphics) {
 	}
 
 }
-void Graph::_dfs(int SleepTime) {
-	time = 0;
-	for each (Vertice^ vertice in vertices) {
-		vertice->state = VertexState::White;
-		vertice->reachTime = 0;
-		vertice->processTime = 0;
-	}
-	for each (Vertice^ vertice in vertices)
-		if(vertice->state == VertexState::White)
-			runDFS(vertice, SleepTime);
-}
-void Graph::DFS() {
-	_dfs(0);
-}
 
 void Graph::runDFS(Vertice^ vertice, int SleepTime) {
 	vertice->reachTime = ++time;
@@ -184,14 +176,73 @@ void Graph::runDFS(Vertice^ vertice, int SleepTime) {
 	}
 }
 
-void Graph::DFSThreadProc(Object^ obj)
-{
-	((Graph ^)obj)->_dfs(((Graph ^)obj)->SleepTime);
+void Graph::runBFS(Vertice^ vertice, int SleepTime) {
+	Queue<Vertice^> queue;
+	queue.Enqueue(vertice);
+	MarkVisited(vertice, SleepTime);
+
+	while (queue.Count > 0) {
+		Vertice^ v = queue.Dequeue();
+		for each (Vertice^ neighbor in v->neighbors)
+			if (neighbor->state == VertexState::White) {
+				queue.Enqueue(neighbor);
+				MarkVisited(neighbor, SleepTime);
+			}
+		v->reachTime = ++time;
+		v->state = VertexState::Black;
+		if (SleepTime > 0) {
+			if (reDrawFunc)
+				reDrawFunc();
+			System::Threading::Thread::Sleep(SleepTime);
+		}
+	}
 }
 
-void Graph::DFSAsync() {
-	Thread^ thread = gcnew Thread(gcnew ParameterizedThreadStart(&Graph::DFSThreadProc));
-	thread->Start(this);
+void Graph::_traversal(int SleepTime, TraversalAlgorithm alg) {
+	time = 0;
+	for each (Vertice^ vertice in vertices) {
+		vertice->state = VertexState::White;
+		vertice->reachTime = 0;
+		vertice->processTime = 0;
+	}
+	for each (Vertice^ vertice in vertices)
+		if (vertice->state == VertexState::White)
+			switch (alg) {
+			case TraversalAlgorithm::DFS:
+				runDFS(vertice, SleepTime);
+				break;
+			case TraversalAlgorithm::BFS:
+				runBFS(vertice, SleepTime);
+				break;
+			}
+}
+
+void Graph::Traversal(TraversalAlgorithm alg) {
+	_traversal(0,alg);
+}
+
+void Graph::TraversalThreadProc(Object^ obj)
+{
+	TraversalThreadData ^data = (TraversalThreadData ^)obj;
+	data->graph->_traversal(data->graph->SleepTime, data->alg);
+}
+
+void Graph::TraversalAsync(TraversalAlgorithm alg) {
+	Thread^ thread = gcnew Thread(gcnew ParameterizedThreadStart(&Graph::TraversalThreadProc));
+	TraversalThreadData ^data = gcnew TraversalThreadData();
+	data->graph = this;
+	data->alg = alg;
+	thread->Start(data);
+}
+
+void Graph::MarkVisited(Vertice^ vertice, int SleepTime) {
+	vertice->reachTime = ++time;
+	vertice->state = VertexState::Gray;
+	if (SleepTime > 0) {
+		if (reDrawFunc)
+			reDrawFunc();
+		System::Threading::Thread::Sleep(SleepTime);
+	}
 }
 
 void Graph::setReDrawFunc(ReDrawFunction func) {

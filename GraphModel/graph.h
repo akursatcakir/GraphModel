@@ -127,13 +127,19 @@ public:
 			parent = Parent;
 		}
 	};
+
+	enum class TraversalAlgorithm { DFS, BFS };
 private:
 
-	void _dfs(int SleepTime);
-	
 	void runDFS(Vertice^ vertice, int SleepTime);
+	
+	void runBFS(Vertice^ vertice, int SleepTime);
 
-	static void DFSThreadProc(Object^ obj);
+	void _traversal(int SleepTime, TraversalAlgorithm alg);
+
+	static void TraversalThreadProc(Object^ obj);
+	
+	void MarkVisited(Vertice^ vertice, int SleepTime);
 
 	unsigned int time;
 
@@ -160,9 +166,9 @@ public:
 
 	void setStateChangedFunc(StateChangedFunction func);
 
-	void DFS();
+	void Traversal(TraversalAlgorithm alg);
 
-	void DFSAsync();
+	void TraversalAsync(TraversalAlgorithm alg);
 
 	void LoadFromText(String^ text);
 

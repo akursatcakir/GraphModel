@@ -68,6 +68,7 @@ namespace GraphModel {
 	private: System::Windows::Forms::TreeView^  tv;
 
 	private: System::Windows::Forms::Splitter^  splitter1;
+	private: System::Windows::Forms::ToolStripMenuItem^  breadthFirstSearchToolStripMenuItem;
 
 
 
@@ -91,7 +92,7 @@ namespace GraphModel {
 		/// </summary>
 		void InitializeComponent(void)
 		{
-			System::Windows::Forms::TreeNode^  treeNode3 = (gcnew System::Windows::Forms::TreeNode(L"Graph"));
+			System::Windows::Forms::TreeNode^  treeNode1 = (gcnew System::Windows::Forms::TreeNode(L"Graph"));
 			this->menuStrip1 = (gcnew System::Windows::Forms::MenuStrip());
 			this->fileToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->openToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
@@ -111,6 +112,7 @@ namespace GraphModel {
 			this->splitter3 = (gcnew System::Windows::Forms::Splitter());
 			this->tv = (gcnew System::Windows::Forms::TreeView());
 			this->splitter1 = (gcnew System::Windows::Forms::Splitter());
+			this->breadthFirstSearchToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->menuStrip1->SuspendLayout();
 			this->panel1->SuspendLayout();
 			this->SuspendLayout();
@@ -160,9 +162,9 @@ namespace GraphModel {
 			// 
 			// graphToolStripMenuItem
 			// 
-			this->graphToolStripMenuItem->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(3) {
+			this->graphToolStripMenuItem->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(4) {
 				this->deepFirstSearchToolStripMenuItem,
-					this->placeAgainToolStripMenuItem, this->drawToolStripMenuItem
+					this->breadthFirstSearchToolStripMenuItem, this->placeAgainToolStripMenuItem, this->drawToolStripMenuItem
 			});
 			this->graphToolStripMenuItem->Name = L"graphToolStripMenuItem";
 			this->graphToolStripMenuItem->Size = System::Drawing::Size(51, 20);
@@ -171,21 +173,21 @@ namespace GraphModel {
 			// deepFirstSearchToolStripMenuItem
 			// 
 			this->deepFirstSearchToolStripMenuItem->Name = L"deepFirstSearchToolStripMenuItem";
-			this->deepFirstSearchToolStripMenuItem->Size = System::Drawing::Size(164, 22);
+			this->deepFirstSearchToolStripMenuItem->Size = System::Drawing::Size(178, 22);
 			this->deepFirstSearchToolStripMenuItem->Text = L"Deep First Search";
 			this->deepFirstSearchToolStripMenuItem->Click += gcnew System::EventHandler(this, &fMain::deepFirstSearchToolStripMenuItem_Click);
 			// 
 			// placeAgainToolStripMenuItem
 			// 
 			this->placeAgainToolStripMenuItem->Name = L"placeAgainToolStripMenuItem";
-			this->placeAgainToolStripMenuItem->Size = System::Drawing::Size(164, 22);
+			this->placeAgainToolStripMenuItem->Size = System::Drawing::Size(178, 22);
 			this->placeAgainToolStripMenuItem->Text = L"Place Vertices";
 			this->placeAgainToolStripMenuItem->Click += gcnew System::EventHandler(this, &fMain::placeAgainToolStripMenuItem_Click);
 			// 
 			// drawToolStripMenuItem
 			// 
 			this->drawToolStripMenuItem->Name = L"drawToolStripMenuItem";
-			this->drawToolStripMenuItem->Size = System::Drawing::Size(164, 22);
+			this->drawToolStripMenuItem->Size = System::Drawing::Size(178, 22);
 			this->drawToolStripMenuItem->Text = L"Refresh Screen";
 			this->drawToolStripMenuItem->Click += gcnew System::EventHandler(this, &fMain::drawToolStripMenuItem_Click);
 			// 
@@ -263,9 +265,9 @@ namespace GraphModel {
 			this->tv->HideSelection = false;
 			this->tv->Location = System::Drawing::Point(0, 0);
 			this->tv->Name = L"tv";
-			treeNode3->Name = L"root";
-			treeNode3->Text = L"Graph";
-			this->tv->Nodes->AddRange(gcnew cli::array< System::Windows::Forms::TreeNode^  >(1) { treeNode3 });
+			treeNode1->Name = L"root";
+			treeNode1->Text = L"Graph";
+			this->tv->Nodes->AddRange(gcnew cli::array< System::Windows::Forms::TreeNode^  >(1) { treeNode1 });
 			this->tv->Size = System::Drawing::Size(200, 65);
 			this->tv->TabIndex = 4;
 			this->tv->AfterSelect += gcnew System::Windows::Forms::TreeViewEventHandler(this, &fMain::tv_AfterSelect);
@@ -277,6 +279,13 @@ namespace GraphModel {
 			this->splitter1->Size = System::Drawing::Size(3, 465);
 			this->splitter1->TabIndex = 6;
 			this->splitter1->TabStop = false;
+			// 
+			// breadthFirstSearchToolStripMenuItem
+			// 
+			this->breadthFirstSearchToolStripMenuItem->Name = L"breadthFirstSearchToolStripMenuItem";
+			this->breadthFirstSearchToolStripMenuItem->Size = System::Drawing::Size(178, 22);
+			this->breadthFirstSearchToolStripMenuItem->Text = L"Breadth First Search";
+			this->breadthFirstSearchToolStripMenuItem->Click += gcnew System::EventHandler(this, &fMain::breadthFirstSearchToolStripMenuItem_Click);
 			// 
 			// fMain
 			// 
@@ -362,7 +371,7 @@ private: System::Void openToolStripMenuItem_Click(System::Object^  sender, Syste
 private: System::Void deepFirstSearchToolStripMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
 	lbGraphStatus->Items->Clear();
 	if (GRAPH->VerticeCount > 0)
-		GRAPH->DFSAsync();
+		GRAPH->TraversalAsync(Graph::TraversalAlgorithm::DFS);
 	else MessageBox::Show("Graph is empty!");
 }
 private: System::Void drawToolStripMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
@@ -404,5 +413,11 @@ private: System::Void tv_AfterSelect(System::Object^  sender, System::Windows::F
 	pg->SelectedObject = tv->SelectedNode->Tag;
 }
 
+private: System::Void breadthFirstSearchToolStripMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
+	lbGraphStatus->Items->Clear();
+	if (GRAPH->VerticeCount > 0)
+		GRAPH->TraversalAsync(Graph::TraversalAlgorithm::BFS);
+	else MessageBox::Show("Graph is empty!");
+}
 };
 }
